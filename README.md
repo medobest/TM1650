@@ -26,5 +26,8 @@ v1.1.0:
 
 - 2015-12-20 - Code clean up. Moved to a single header file. Added Gradual brightness method
 
+v1.1.0:
+
+- 2025-12-24 - adding button read
 
 
