@@ -16,6 +16,24 @@
  *  v1.1.0:
  *      2015-12-20 - code clean up. Moved to a single header file. Added Gradual brightness method
  *
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  * ===============================================*/
 
 #include <Arduino.h>
@@ -25,14 +43,10 @@
 #ifndef _TM1650_H_
 #define _TM1650_H_
 
-//#define TM1650_USE_PROGMEM
+#define TM1650_USE_PROGMEM
 
 #ifdef TM1650_USE_PROGMEM
-    #if (defined(__AVR__))
-      #include <avr\pgmspace.h>
-    #else
-      #include <pgmspace.h>
-    #endif
+#include <avr/pgmspace.h>
 #endif
 
 #define TM1650_DISPLAY_BASE 0x34 // Address of the left-most digit 
@@ -86,12 +100,13 @@ class TM1650 {
 	void	setDot(unsigned int aPos, bool aState);
 	byte	getPosition(unsigned int aPos) { return iBuffer[aPos]; };
 	inline unsigned int	getNumPositions() { return iNumDigits; };
-
+	uint8_t readButtons();
     private:
 	char 	*iPosition;
 	bool	iActive;
 	unsigned int	iNumDigits;
 	unsigned int	iBrightness;
+	uint8_t	keyData;
     char	iString[TM1650_MAX_STRING+1];
     byte 	iBuffer[TM1650_NUM_DIGITS+1];
     byte 	iCtrl[TM1650_NUM_DIGITS];
@@ -306,7 +321,22 @@ int TM1650::displayRunningShift() {
     	displayString(++iPosition);
 	return (strlen(iPosition) - iNumDigits);
 }
+/** Read Button
+ */
+uint8_t TM1650::readButtons()
+// turn all digits on
+{
 
+
+  // 1. Request 1 byte from the Control Register address
+  Wire.requestFrom(TM1650_DCTRL_BASE, 1);
+  
+  if (Wire.available()) {
+    keyData = Wire.read();
+  }
+
+  return keyData;
+}
 
 
 #endif /* _TM1650_H_ */
