@@ -1,85 +1,79 @@
 #include <Wire.h>
 #include <TM1650.h>
-
+#define reddot 2
+#define greendot 0
+#define semicol 1
 TM1650 d;
+unsigned long previousMillis = 0;  // will store last time LED was updated
 
-void setup() 
-{
-  Wire.begin(); //Join the bus as master
+// constants won't change:
+const long interval = 300;  // interval at which to blink (milliseconds)
+void setup() {
+  Wire.begin();  //Join the bus as master
 
-  Serial.begin(38400); //Start serial communication at 9600 for debug statements
+  Serial.begin(9600);  //Start serial communication at 9600 for debug statements
   Serial.println("TM1650 Example Code");
-
   d.init();
-   
-}
-
-void loop() 
-{
   d.displayOff();
+  d.displayOn();
   d.displayString("____");
-  d.setBrightness(TM1650_MIN_BRIGHT);
-  d.displayOn();
+  d.setBrightness(TM1650_MAX_BRIGHT);
   delay(100);
-  char line[] = "1234";
-
+  char line[] = "on  ";
   d.displayString(line);
-  d.setBrightnessGradually(TM1650_MAX_BRIGHT);
-  delay(2000);
-  d.setBrightnessGradually(TM1650_MIN_BRIGHT);
-  d.displayOff();
-  delay(1000);
-  
-  line[1] |= 128;
-  d.displayOn();
-  d.setBrightnessGradually(TM1650_MAX_BRIGHT);
-  d.displayString(line);
-  delay(2000);
-  
-//  for (int i=0; i<8; i++) {
-//    d.setBrightness(i);
-//    delay(500);
-//  }
-  
-  d.displayString("abcd");
-  delay(2000);
-
-  d.displayString("789 ");
-  delay(2000);
-  
-  if (d.displayRunning("1234567890abcdefghijklmnop")) {
-    while (d.displayRunningShift()) delay(500);
-  }
-  delay(2000);
-  
-  for (int i = 0; i<20; i++) {
-    d.displayOff();
-    delay(200);
-    d.displayOn();
-    delay(200);
-  }
-  
-  for (int i = 0; i<20; i++) {
-    d.setBrightness(1);
-    delay(200);
-    d.setBrightness(7);
-    delay(200);
-  }
-
-  for (int i = 0; i<20; i++) {
-    for (int j = 0; j<4; j++) {
-       d.setDot(j,true);
-       delay(200);
-    }
-    for (int j = 0; j<4; j++) {
-       d.setDot(j,false);
-       delay(200);
-    }
-  }
-
-  
+  d.setDot(reddot, true);
 }
 
+void loop() {
 
 
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    uint8_t key = d.readButtons();
 
+    if (key != 0) {
+
+      switch (key) {
+
+        case 79:
+          // statements
+          Serial.print("Button Data Received: ");
+          Serial.println("Power");
+          break;
+        case 111:
+          // statements
+          Serial.print("Button Data Received: ");
+          Serial.println("C-");
+          break;
+        case 87:
+          // statements
+          Serial.print("Button Data Received: ");
+          Serial.println("c+");
+          break;
+        case 119:
+          // statements
+          Serial.print("Button Data Received: ");
+          Serial.println("V-");
+          break;
+        case 95:
+          // statements
+          Serial.print("Button Data Received: ");
+          Serial.println("V+");
+          break;
+        case 71:
+          // statements
+          Serial.print("Button Data Received: ");
+          Serial.println("Menu");
+          break;
+        case 103:
+          // statements
+          Serial.print("Button Data Received: ");
+          Serial.println("OK");
+          break;
+      }
+
+      delay(200);
+    }
+  }
+}
